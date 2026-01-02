@@ -49,13 +49,15 @@ class Settings(BaseSettings):
     initial_ability_score: float = 0.0
     initial_ability_variance: float = 1.0
     
-    # CORS - Add your production domains here
-    cors_origins: list = [
-        "http://localhost:5067",
-        "http://localhost:8080",
-        "https://*.railway.app",  # Railway deployment
-        "*"  # Allow all origins for mobile app
-    ]
+    # CORS - Allow all origins for mobile app (can't use list type with Railway env vars)
+    cors_origins: str = "*"
+    
+    @property
+    def cors_origins_list(self) -> list:
+        """Parse CORS origins from string to list."""
+        if self.cors_origins == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.cors_origins.split(",")]
     
     class Config:
         env_file = "../.env"
