@@ -1,6 +1,8 @@
 """
 WonderWorld Learning Adventure - Game Router
 Handles game state, achievements, streaks, and progress
+
+NOTE: Authentication disabled - kids play directly without login.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,11 +11,11 @@ from datetime import datetime
 from typing import List
 
 from app.database import get_db
-from app.models.models import Parent, Child, GameState, PlaySession
+from app.models.models import Child, GameState, PlaySession
 from app.schemas.schemas import (
     GameStateResponse, GameStateUpdate, AchievementUnlock, PlaySessionResponse
 )
-from app.services.dependencies import get_current_parent, get_child_for_parent
+from app.services.dependencies import get_child_by_id
 from app.services.game_service import GameService
 
 router = APIRouter()
@@ -22,7 +24,6 @@ router = APIRouter()
 @router.get("/{child_id}/state", response_model=GameStateResponse)
 async def get_game_state(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -30,7 +31,7 @@ async def get_game_state(
     
     Includes world position, stars, achievements, and streak info.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     result = await db.execute(
         select(GameState).where(GameState.child_id == child.id)
@@ -50,13 +51,12 @@ async def get_game_state(
 async def update_game_state(
     child_id: str,
     data: GameStateUpdate,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Update game state (checkpoint, level, world position).
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     result = await db.execute(
         select(GameState).where(GameState.child_id == child.id)
@@ -86,13 +86,12 @@ async def update_game_state(
 async def add_stars(
     child_id: str,
     stars: int,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Add stars to a child's total.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     game_service = GameService(db)
     result = await game_service.add_stars(child.id, stars)
@@ -104,13 +103,12 @@ async def add_stars(
 async def unlock_achievement(
     child_id: str,
     achievement_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Unlock an achievement for a child.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     game_service = GameService(db)
     achievement = await game_service.unlock_achievement(child.id, achievement_id)
@@ -123,7 +121,6 @@ async def start_play_session(
     child_id: str,
     platform: str = "web",
     screen_size: str = "tablet",
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -131,7 +128,7 @@ async def start_play_session(
     
     Track engagement and update streak.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     game_service = GameService(db)
     session = await game_service.start_session(child.id, platform, screen_size)
@@ -145,13 +142,12 @@ async def end_play_session(
     session_id: str,
     tasks_attempted: int = 0,
     tasks_completed: int = 0,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     End a play session.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     game_service = GameService(db)
     session = await game_service.end_session(
@@ -165,13 +161,12 @@ async def end_play_session(
 async def get_play_sessions(
     child_id: str,
     limit: int = 20,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get play session history.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     result = await db.execute(
         select(PlaySession)
@@ -187,13 +182,12 @@ async def get_play_sessions(
 @router.get("/{child_id}/streak")
 async def get_streak_info(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get streak information.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     result = await db.execute(
         select(GameState).where(GameState.child_id == child.id)

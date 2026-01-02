@@ -22,6 +22,24 @@ class _PhonicsScreenState extends State<PhonicsScreen> {
     {'letter': 'F', 'sound': 'fuh', 'word': 'Fish', 'emoji': '🐟'},
     {'letter': 'G', 'sound': 'guh', 'word': 'Giraffe', 'emoji': '🦒'},
     {'letter': 'H', 'sound': 'huh', 'word': 'House', 'emoji': '🏠'},
+    {'letter': 'I', 'sound': 'ih', 'word': 'Ice cream', 'emoji': '🍦'},
+    {'letter': 'J', 'sound': 'juh', 'word': 'Juice', 'emoji': '🧃'},
+    {'letter': 'K', 'sound': 'kuh', 'word': 'Kite', 'emoji': '🪁'},
+    {'letter': 'L', 'sound': 'luh', 'word': 'Lion', 'emoji': '🦁'},
+    {'letter': 'M', 'sound': 'muh', 'word': 'Moon', 'emoji': '🌙'},
+    {'letter': 'N', 'sound': 'nuh', 'word': 'Nest', 'emoji': '🪺'},
+    {'letter': 'O', 'sound': 'oh', 'word': 'Orange', 'emoji': '🍊'},
+    {'letter': 'P', 'sound': 'puh', 'word': 'Penguin', 'emoji': '🐧'},
+    {'letter': 'Q', 'sound': 'kwuh', 'word': 'Queen', 'emoji': '👸'},
+    {'letter': 'R', 'sound': 'ruh', 'word': 'Rainbow', 'emoji': '🌈'},
+    {'letter': 'S', 'sound': 'suh', 'word': 'Sun', 'emoji': '☀️'},
+    {'letter': 'T', 'sound': 'tuh', 'word': 'Tiger', 'emoji': '🐯'},
+    {'letter': 'U', 'sound': 'uh', 'word': 'Umbrella', 'emoji': '☂️'},
+    {'letter': 'V', 'sound': 'vuh', 'word': 'Violin', 'emoji': '🎻'},
+    {'letter': 'W', 'sound': 'wuh', 'word': 'Watermelon', 'emoji': '🍉'},
+    {'letter': 'X', 'sound': 'ks', 'word': 'Xylophone', 'emoji': '🎵'},
+    {'letter': 'Y', 'sound': 'yuh', 'word': 'Yo-yo', 'emoji': '🪀'},
+    {'letter': 'Z', 'sound': 'zuh', 'word': 'Zebra', 'emoji': '🦓'},
   ];
   
   int _currentIndex = 0;
@@ -76,23 +94,27 @@ class _PhonicsScreenState extends State<PhonicsScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              // Progress dots
+              // Progress indicator with letter count
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  _phonicsData.length,
-                  (i) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: i == _currentIndex 
-                          ? AppTheme.literacyColor 
-                          : AppTheme.literacyColor.withOpacity(0.3),
+                children: [
+                  Text(
+                    'Letter ${_currentIndex + 1} of ${_phonicsData.length}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppTheme.literacyColor,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Progress bar
+              LinearProgressIndicator(
+                value: (_currentIndex + 1) / _phonicsData.length,
+                backgroundColor: AppTheme.literacyColor.withOpacity(0.2),
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.literacyColor),
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(4),
               ),
               
               const Spacer(),

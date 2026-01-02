@@ -1,15 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
 
+/// Storage Service for WonderWorld Learning Adventure
+/// 
+/// NOTE: Authentication is disabled - uses device-based identification.
+/// Stores all learning progress locally on device.
 class StorageService {
-  static Box? _authBox;
+  static Box? _deviceBox;
   static Box? _childBox;
   static Box? _progressBox;
   static Box? _settingsBox;
   static Box? _learningProgressBox;
   static bool _isInitialized = false;
   
-  static const String authBoxName = 'auth';
+  static const String deviceBoxName = 'device';
   static const String childBoxName = 'child';
   static const String progressBoxName = 'progress';
   static const String settingsBoxName = 'settings';
@@ -19,25 +24,28 @@ class StorageService {
     if (_isInitialized) return;
     
     try {
-      _authBox = await Hive.openBox(authBoxName);
+      _deviceBox = await Hive.openBox(deviceBoxName);
       _childBox = await Hive.openBox(childBoxName);
       _progressBox = await Hive.openBox(progressBoxName);
       _settingsBox = await Hive.openBox(settingsBoxName);
       _learningProgressBox = await Hive.openBox(learningProgressBoxName);
       _isInitialized = true;
+      
+      // Generate device ID if not exists
+      if (deviceId == null) {
+        _deviceBox?.put('deviceId', const Uuid().v4());
+      }
+      
       debugPrint('StorageService: All boxes initialized successfully');
+      debugPrint('StorageService: Device ID = $deviceId');
     } catch (e) {
       debugPrint('StorageService: Error initializing boxes: $e');
       _isInitialized = false;
     }
   }
   
-  // Auth tokens
-  static String? get accessToken => _authBox?.get('accessToken');
-  static set accessToken(String? value) => _authBox?.put('accessToken', value);
-  
-  static String? get refreshToken => _authBox?.get('refreshToken');
-  static set refreshToken(String? value) => _authBox?.put('refreshToken', value);
+  // Device identification (for anonymous child profiles)
+  static String? get deviceId => _deviceBox?.get('deviceId');
   
   // Current child
   static String? get currentChildId => _childBox?.get('currentChildId');
@@ -227,14 +235,24 @@ class StorageService {
     }
   }
   
-  // Clear all data (logout)
+  // Clear all data (keep device ID for identification)
   static Future<void> clearAll() async {
-    await _authBox?.clear();
     await _childBox?.clear();
+    await _progressBox?.clear();
+    // Note: We keep deviceId to maintain anonymous profile
   }
   
   /// Clear only progress data (for testing)
   static Future<void> clearProgress() async {
+    await _learningProgressBox?.clear();
+  }
+  
+  /// Reset everything including device ID (full factory reset)
+  static Future<void> factoryReset() async {
+    await _deviceBox?.clear();
+    await _childBox?.clear();
+    await _progressBox?.clear();
+    await _settingsBox?.clear();
     await _learningProgressBox?.clear();
   }
 }

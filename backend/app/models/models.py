@@ -94,13 +94,17 @@ class Child(Base):
     __tablename__ = "children"
     
     id = Column(String(36), primary_key=True, default=generate_uuid)
-    parent_id = Column(String(36), ForeignKey("parents.id", ondelete="CASCADE"), nullable=False)
+    parent_id = Column(String(36), ForeignKey("parents.id", ondelete="CASCADE"), nullable=True)  # Optional for anonymous
+    
+    # Device-based identification (for anonymous kids mode)
+    device_id = Column(String(100), nullable=True, index=True)
+    is_anonymous = Column(Boolean, default=False)
     
     # Minimal identifying info (COPPA compliant)
     display_name = Column(String(50), nullable=False)
-    avatar_id = Column(Integer, default=1)
+    avatar_id = Column(String(50), default="avatar_star")
     birth_year = Column(Integer)
-    age_group = Column(SQLEnum(AgeGroup), nullable=False)
+    age_group = Column(String(10), default="3-5")
     
     # Preferences
     preferred_language = Column(String(10), default="en")

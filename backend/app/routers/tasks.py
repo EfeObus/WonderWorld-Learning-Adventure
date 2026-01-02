@@ -1,6 +1,8 @@
 """
 WonderWorld Learning Adventure - Tasks Router
 Handles adaptive learning task selection and responses
+
+NOTE: Authentication disabled - kids play directly without login.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,12 +10,12 @@ from sqlalchemy import select
 from typing import List
 
 from app.database import get_db
-from app.models.models import Parent, Child, Task, TaskResponse as TaskResponseModel
+from app.models.models import Child, Task, TaskResponse as TaskResponseModel
 from app.schemas.schemas import (
     TaskResponse, TaskSubmission, TaskResultResponse, 
     AdaptiveTaskRequest, LearningModuleEnum
 )
-from app.services.dependencies import get_current_parent, get_child_for_parent
+from app.services.dependencies import get_child_by_id
 from app.services.adaptive_learning_service import AdaptiveLearningService
 
 router = APIRouter()
@@ -22,7 +24,6 @@ router = APIRouter()
 @router.post("/next", response_model=TaskResponse)
 async def get_next_task(
     request: AdaptiveTaskRequest,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -37,7 +38,7 @@ async def get_next_task(
     - B = Child's ability level
     - D = Task difficulty
     """
-    child = await get_child_for_parent(request.child_id, current_parent.id, db)
+    child = await get_child_by_id(request.child_id, db)
     
     adaptive_service = AdaptiveLearningService(db)
     task = await adaptive_service.select_next_task(
@@ -58,7 +59,6 @@ async def get_next_task(
 @router.post("/submit", response_model=TaskResultResponse)
 async def submit_task_response(
     submission: TaskSubmission,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -93,13 +93,12 @@ async def get_task_history(
     child_id: str,
     module: LearningModuleEnum = None,
     limit: int = 50,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get a child's task response history.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     query = select(TaskResponseModel).where(TaskResponseModel.child_id == child.id)
     
@@ -117,13 +116,12 @@ async def get_task_history(
 @router.get("/{child_id}/ability")
 async def get_ability_estimates(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get a child's ability estimates across all modules.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     adaptive_service = AdaptiveLearningService(db)
     abilities = await adaptive_service.get_ability_estimates(child.id)

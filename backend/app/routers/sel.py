@@ -1,6 +1,8 @@
 """
 WonderWorld Learning Adventure - SEL Router
 Handles Social-Emotional Learning activities
+
+NOTE: Authentication disabled - kids play directly without login.
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,9 +10,9 @@ from sqlalchemy import select
 from typing import List
 
 from app.database import get_db
-from app.models.models import Parent, Child, SelProgress
+from app.models.models import Child, SelProgress
 from app.schemas.schemas import SelProgressResponse, EmotionLogEntry
-from app.services.dependencies import get_current_parent, get_child_for_parent
+from app.services.dependencies import get_child_by_id
 from app.services.sel_service import SelService
 
 router = APIRouter()
@@ -19,7 +21,6 @@ router = APIRouter()
 @router.get("/{child_id}/progress", response_model=SelProgressResponse)
 async def get_sel_progress(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -32,7 +33,7 @@ async def get_sel_progress(
     - Sharing scenarios passed
     - Calm-down techniques learned
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     result = await db.execute(
         select(SelProgress).where(SelProgress.child_id == child.id)
@@ -52,7 +53,6 @@ async def get_sel_progress(
 async def record_feelings_wheel_use(
     child_id: str,
     emotion: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -60,7 +60,7 @@ async def record_feelings_wheel_use(
     
     The feelings wheel helps children identify and express emotions.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     sel_service = SelService(db)
     result = await sel_service.record_feelings_wheel(child.id, emotion)
@@ -72,13 +72,12 @@ async def record_feelings_wheel_use(
 async def log_emotion(
     child_id: str,
     entry: EmotionLogEntry,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Log an emotion identification event.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     sel_service = SelService(db)
     result = await sel_service.log_emotion(child.id, entry)
@@ -90,7 +89,6 @@ async def log_emotion(
 async def complete_kindness_bingo(
     child_id: str,
     task_completed: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -102,7 +100,7 @@ async def complete_kindness_bingo(
     - Helping with chores
     - Giving a compliment
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     sel_service = SelService(db)
     result = await sel_service.complete_kindness_task(child.id, task_completed)
@@ -116,7 +114,6 @@ async def complete_sharing_scenario(
     scenario_id: str,
     response_chosen: str,
     was_prosocial: bool,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -125,7 +122,7 @@ async def complete_sharing_scenario(
     Scenarios present social situations and track
     whether children choose prosocial responses.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     sel_service = SelService(db)
     result = await sel_service.record_sharing_scenario(
@@ -140,7 +137,6 @@ async def learn_calm_down_technique(
     child_id: str,
     technique: str,
     practiced: bool = True,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -153,7 +149,7 @@ async def learn_calm_down_technique(
     - Find a quiet spot
     - Talk about feelings
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     sel_service = SelService(db)
     result = await sel_service.learn_calm_down_technique(child.id, technique)
@@ -164,7 +160,6 @@ async def learn_calm_down_technique(
 @router.get("/{child_id}/emotions-summary")
 async def get_emotions_summary(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -172,7 +167,7 @@ async def get_emotions_summary(
     
     Helps parents understand their child's emotional patterns.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     sel_service = SelService(db)
     summary = await sel_service.get_emotions_summary(child.id)
@@ -232,13 +227,12 @@ async def record_friendship_story_completion(
     story_id: str,
     pages_read: int,
     understood_lesson: bool = True,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Record completion of a friendship story.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     return {
         "success": True,
@@ -256,13 +250,12 @@ async def record_breathing_exercise(
     exercise_type: str = Query(..., description="Type of breathing exercise (bubble, counting, etc.)"),
     duration_seconds: int = Query(..., ge=0),
     completed: bool = Query(default=True),
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Record a breathing/calming exercise session.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     return {
         "success": True,

@@ -16,7 +16,7 @@ class CountingScreen extends StatefulWidget {
 class _CountingScreenState extends State<CountingScreen> {
   int _currentNumber = 1;
   int _starsEarned = 0;
-  final int _maxNumber = 20;
+  final int _maxNumber = 100;
 
   @override
   void initState() {
@@ -134,7 +134,7 @@ class _CountingScreenState extends State<CountingScreen> {
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go('/home/numeracy'),
         ),
-        title: const Text('Counting 1-20'),
+        title: const Text('Counting 1-100'),
         actions: [
           // Counting song button
           IconButton(

@@ -63,21 +63,26 @@ CREATE INDEX idx_parents_email ON parents(email);
 
 -- =============================================================================
 -- CHILD PROFILES (Minimal data per COPPA)
+-- Now supports anonymous children via device_id
 -- =============================================================================
 
 CREATE TABLE children (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    parent_id UUID NOT NULL REFERENCES parents(id) ON DELETE CASCADE,
+    parent_id UUID REFERENCES parents(id) ON DELETE CASCADE, -- Nullable for anonymous
+    device_id VARCHAR(100), -- For anonymous child identification
     
     -- Minimal identifying info (COPPA compliant - no full names/photos)
-    display_name VARCHAR(50) NOT NULL, -- Nickname or first name only
-    avatar_id INTEGER DEFAULT 1, -- Pre-defined avatar, no uploads
+    display_name VARCHAR(50) NOT NULL DEFAULT 'Little Star', -- Nickname or first name only
+    avatar_id VARCHAR(50) DEFAULT 'avatar_star', -- Pre-defined avatar string
     birth_year INTEGER, -- Year only, not full DOB
-    age_group age_group NOT NULL,
+    age_group VARCHAR(10) DEFAULT '3-5', -- Simplified to string
     
     -- Preferences
     preferred_language VARCHAR(10) DEFAULT 'en',
     sound_enabled BOOLEAN DEFAULT TRUE,
+    
+    -- Anonymous flag
+    is_anonymous BOOLEAN DEFAULT FALSE,
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -85,6 +90,7 @@ CREATE TABLE children (
 );
 
 CREATE INDEX idx_children_parent ON children(parent_id);
+CREATE INDEX idx_children_device ON children(device_id);
 
 -- =============================================================================
 -- LITERACY ENGINE

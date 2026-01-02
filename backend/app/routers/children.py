@@ -1,33 +1,66 @@
 """
 WonderWorld Learning Adventure - Children Router
 Manages child profiles (COPPA compliant - minimal data)
+
+NOTE: Authentication disabled - kids play directly without login.
+Uses device-based identification for anonymous child profiles.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from typing import List
+from typing import List, Optional
 
 from app.database import get_db
-from app.models.models import Parent, Child, LiteracyProgress, NumeracyProgress, SelProgress, GameState
+from app.models.models import Child, LiteracyProgress, NumeracyProgress, SelProgress, GameState
 from app.schemas.schemas import ChildCreate, ChildUpdate, ChildResponse, ChildWithProgress
-from app.services.dependencies import get_current_parent
+from app.services.dependencies import get_or_create_anonymous_child, get_child_by_id
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[ChildWithProgress])
-async def get_children(
-    current_parent: Parent = Depends(get_current_parent),
+@router.get("/me", response_model=ChildWithProgress)
+async def get_or_create_current_child(
+    child: Child = Depends(get_or_create_anonymous_child),
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Get all children for the authenticated parent.
+    Get or create an anonymous child profile for the current device.
+    Uses X-Device-ID header to identify the device.
+    """
+    child_data = ChildWithProgress.model_validate(child)
+    
+    # Get game state for stars and streak
+    game_result = await db.execute(
+        select(GameState).where(GameState.child_id == child.id)
+    )
+    game_state = game_result.scalar_one_or_none()
+    
+    if game_state:
+        child_data.stars_earned = game_state.stars_earned or 0
+        child_data.current_streak_days = game_state.current_streak_days or 0
+        child_data.last_played_at = game_state.last_played_at
+    
+    # Get literacy stage
+    literacy_result = await db.execute(
+        select(LiteracyProgress).where(LiteracyProgress.child_id == child.id)
+    )
+    literacy = literacy_result.scalar_one_or_none()
+    
+    if literacy:
+        child_data.literacy_stage = literacy.current_stage
+    
+    return child_data
+
+
+@router.get("/", response_model=List[ChildWithProgress])
+async def get_all_children(
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get all active children (for dashboard/admin purposes).
     """
     result = await db.execute(
-        select(Child).where(
-            Child.parent_id == current_parent.id,
-            Child.is_active == True
-        )
+        select(Child).where(Child.is_active == True)
     )
     children = result.scalars().all()
     
@@ -64,31 +97,24 @@ async def get_children(
 @router.post("/", response_model=ChildResponse, status_code=status.HTTP_201_CREATED)
 async def create_child(
     data: ChildCreate,
-    current_parent: Parent = Depends(get_current_parent),
+    device_id: Optional[str] = Header(None, alias="X-Device-ID"),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Create a new child profile.
     
-    Requires verified parental consent (COPPA).
-    Only minimal data is stored - no full names, photos, or precise DOB.
+    No authentication required - creates anonymous child profile.
     """
-    # Check consent status
-    if current_parent.consent_status != "verified":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Parental consent required before creating child profiles"
-        )
-    
     # Create child
     child = Child(
-        parent_id=current_parent.id,
         display_name=data.display_name,
-        avatar_id=data.avatar_id,
-        birth_year=data.birth_year,
-        age_group=data.age_group,
-        preferred_language=data.preferred_language,
-        sound_enabled=data.sound_enabled
+        avatar_id=data.avatar_id if hasattr(data, 'avatar_id') else "avatar_star",
+        birth_year=data.birth_year if hasattr(data, 'birth_year') else None,
+        age_group=data.age_group if hasattr(data, 'age_group') else "3-5",
+        preferred_language=data.preferred_language if hasattr(data, 'preferred_language') else "en",
+        sound_enabled=data.sound_enabled if hasattr(data, 'sound_enabled') else True,
+        device_id=device_id,
+        is_anonymous=True
     )
     
     db.add(child)
@@ -98,7 +124,7 @@ async def create_child(
     literacy = LiteracyProgress(child_id=child.id)
     numeracy = NumeracyProgress(child_id=child.id)
     sel = SelProgress(child_id=child.id)
-    game_state = GameState(child_id=child.id)
+    game_state = GameState(child_id=child.id, stars_earned=0)
     
     db.add_all([literacy, numeracy, sel, game_state])
     await db.commit()
@@ -110,26 +136,12 @@ async def create_child(
 @router.get("/{child_id}", response_model=ChildWithProgress)
 async def get_child(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get a specific child's profile.
     """
-    result = await db.execute(
-        select(Child).where(
-            Child.id == child_id,
-            Child.parent_id == current_parent.id,
-            Child.is_active == True
-        )
-    )
-    child = result.scalar_one_or_none()
-    
-    if not child:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Child not found"
-        )
+    child = await get_child_by_id(child_id, db)
     
     child_data = ChildWithProgress.model_validate(child)
     
@@ -151,25 +163,12 @@ async def get_child(
 async def update_child(
     child_id: str,
     data: ChildUpdate,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Update a child's profile.
     """
-    result = await db.execute(
-        select(Child).where(
-            Child.id == child_id,
-            Child.parent_id == current_parent.id
-        )
-    )
-    child = result.scalar_one_or_none()
-    
-    if not child:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Child not found"
-        )
+    child = await get_child_by_id(child_id, db)
     
     # Update fields
     update_data = data.model_dump(exclude_unset=True)
@@ -185,28 +184,12 @@ async def update_child(
 @router.delete("/{child_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_child(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Soft delete a child profile.
-    
-    Data is retained for the legally required period (GDPR) but marked inactive.
-    For full deletion, use the data deletion request endpoint.
     """
-    result = await db.execute(
-        select(Child).where(
-            Child.id == child_id,
-            Child.parent_id == current_parent.id
-        )
-    )
-    child = result.scalar_one_or_none()
-    
-    if not child:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Child not found"
-        )
+    child = await get_child_by_id(child_id, db)
     
     child.is_active = False
     await db.commit()

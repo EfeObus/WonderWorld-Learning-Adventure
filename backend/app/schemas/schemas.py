@@ -97,18 +97,18 @@ class ConsentVerification(BaseModel):
 # ============== Child Schemas ==============
 
 class ChildCreate(BaseModel):
-    display_name: str = Field(..., min_length=1, max_length=50)
-    avatar_id: int = Field(default=1, ge=1, le=20)
+    display_name: str = Field(default="Little Star", min_length=1, max_length=50)
+    avatar_id: str = Field(default="avatar_star", max_length=50)
     birth_year: Optional[int] = Field(None, ge=2016, le=2026)
-    age_group: AgeGroupEnum
+    age_group: str = Field(default="3-5", max_length=10)
     preferred_language: str = Field(default="en", max_length=10)
     sound_enabled: bool = True
 
 
 class ChildUpdate(BaseModel):
     display_name: Optional[str] = Field(None, max_length=50)
-    avatar_id: Optional[int] = Field(None, ge=1, le=20)
-    age_group: Optional[AgeGroupEnum] = None
+    avatar_id: Optional[str] = Field(None, max_length=50)
+    age_group: Optional[str] = Field(None, max_length=10)
     preferred_language: Optional[str] = None
     sound_enabled: Optional[bool] = None
 
@@ -116,10 +116,11 @@ class ChildUpdate(BaseModel):
 class ChildResponse(BaseModel):
     id: str
     display_name: str
-    avatar_id: int
-    age_group: AgeGroupEnum
+    avatar_id: str
+    age_group: str
     preferred_language: str
     sound_enabled: bool
+    is_anonymous: bool = True
     created_at: datetime
     
     class Config:

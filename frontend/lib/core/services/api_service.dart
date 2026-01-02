@@ -1,6 +1,10 @@
 import 'package:dio/dio.dart';
 import 'storage_service.dart';
 
+/// API Service for WonderWorld Learning Adventure
+/// 
+/// NOTE: Authentication is disabled - kids play directly without login.
+/// Uses device-based identification for progress tracking.
 class ApiService {
   static const String baseUrl = 'http://localhost:5067/api';
   
@@ -17,63 +21,26 @@ class ApiService {
       },
     ));
     
+    // Add device ID header for anonymous child identification
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        final token = StorageService.accessToken;
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
+        final deviceId = StorageService.deviceId;
+        if (deviceId != null) {
+          options.headers['X-Device-ID'] = deviceId;
         }
         return handler.next(options);
       },
-      onError: (error, handler) async {
-        if (error.response?.statusCode == 401) {
-          // Try to refresh token
-          final refreshed = await _refreshToken();
-          if (refreshed) {
-            // Retry the request
-            final opts = error.requestOptions;
-            opts.headers['Authorization'] = 'Bearer ${StorageService.accessToken}';
-            final response = await _dio.fetch(opts);
-            return handler.resolve(response);
-          }
-        }
+      onError: (error, handler) {
+        // Log errors for debugging
+        print('API Error: ${error.message}');
         return handler.next(error);
       },
     ));
   }
   
-  Future<bool> _refreshToken() async {
-    try {
-      final refreshToken = StorageService.refreshToken;
-      if (refreshToken == null) return false;
-      
-      final response = await Dio().post(
-        '$baseUrl/auth/refresh',
-        data: {'refresh_token': refreshToken},
-      );
-      
-      if (response.statusCode == 200) {
-        StorageService.accessToken = response.data['access_token'];
-        StorageService.refreshToken = response.data['refresh_token'];
-        return true;
-      }
-    } catch (e) {
-      // Refresh failed
-    }
-    return false;
-  }
+  // Children - Anonymous access
+  Future<Response> getCurrentChild() => _dio.get('/children/me');
   
-  // Auth
-  Future<Response> register(Map<String, dynamic> data) => 
-      _dio.post('/auth/register', data: data);
-  
-  Future<Response> login(String email, String password) => 
-      _dio.post('/auth/login', data: {'email': email, 'password': password});
-  
-  Future<Response> logout() => 
-      _dio.post('/auth/logout', data: {'refresh_token': StorageService.refreshToken});
-  
-  // Children
   Future<Response> getChildren() => _dio.get('/children');
   
   Future<Response> createChild(Map<String, dynamic> data) => 
@@ -81,6 +48,9 @@ class ApiService {
   
   Future<Response> getChild(String childId) => 
       _dio.get('/children/$childId');
+  
+  Future<Response> updateChild(String childId, Map<String, dynamic> data) => 
+      _dio.put('/children/$childId', data: data);
   
   // Literacy
   Future<Response> getLiteracyProgress(String childId) => 
@@ -199,6 +169,41 @@ class ApiService {
       _dio.post('/literacy/$childId/story/$storyId/complete', queryParameters: {
         'pages_read': pagesRead,
       });
+  
+  // Numeracy - Additional
+  Future<Response> recordShape(String childId, String shapeName, bool recognized, int responseTimeMs) => 
+      _dio.post('/numeracy/$childId/shapes', queryParameters: {
+        'shape_name': shapeName,
+        'recognized': recognized,
+        'response_time_ms': responseTimeMs,
+      });
+  
+  Future<Response> getShapesProgress(String childId) => 
+      _dio.get('/numeracy/$childId/shapes/progress');
+  
+  Future<Response> recordSubitizing(String childId, int shown, int guessed, int responseTimeMs) => 
+      _dio.post('/numeracy/$childId/subitizing', queryParameters: {
+        'shown_count': shown,
+        'guessed_count': guessed,
+        'response_time_ms': responseTimeMs,
+      });
+  
+  Future<Response> recordNumeralRecognition(String childId, int numeral, bool recognized) => 
+      _dio.post('/numeracy/$childId/numeral-recognition', queryParameters: {
+        'numeral': numeral,
+        'recognized': recognized,
+      });
+  
+  Future<Response> recordPuzzle(String childId, int level, bool completed, {int attempts = 1}) => 
+      _dio.post('/numeracy/$childId/st-puzzle', queryParameters: {
+        'puzzle_level': level,
+        'completed': completed,
+        'attempts': attempts,
+      });
+}
+
+// Provider
+final apiService = ApiService();
   
   // Numeracy - Additional
   Future<Response> recordShape(String childId, String shapeName, bool recognized, int responseTimeMs) => 

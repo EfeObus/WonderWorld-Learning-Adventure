@@ -1,6 +1,8 @@
 """
 WonderWorld Learning Adventure - Literacy Router
 Handles letter tracing, phonics, and word learning endpoints
+
+NOTE: Authentication disabled - kids play directly without login.
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,14 +11,14 @@ from typing import List, Optional
 
 from app.database import get_db
 from app.models.models import (
-    Parent, Child, LiteracyProgress, TracingSession, 
+    Child, LiteracyProgress, TracingSession, 
     Word, WordProgress
 )
 from app.schemas.schemas import (
     LiteracyProgressResponse, TracingSessionCreate, TracingSessionResponse,
     WordResponse, WordProgressResponse, WordsByLevel, WordLevelEnum
 )
-from app.services.dependencies import get_current_parent, get_child_for_parent
+from app.services.dependencies import get_child_by_id
 from app.services.literacy_service import LiteracyService
 
 router = APIRouter()
@@ -25,13 +27,12 @@ router = APIRouter()
 @router.get("/{child_id}/progress", response_model=LiteracyProgressResponse)
 async def get_literacy_progress(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get child's literacy progress including letter mastery and word reading scores.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     result = await db.execute(
         select(LiteracyProgress).where(LiteracyProgress.child_id == child.id)
@@ -51,7 +52,6 @@ async def get_literacy_progress(
 async def record_tracing_session(
     child_id: str,
     data: TracingSessionCreate,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -60,7 +60,7 @@ async def record_tracing_session(
     This endpoint receives stroke analysis data from the Flutter app's
     PathMetrics comparison against ideal letter paths.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     # Create tracing session
     session = TracingSession(
@@ -97,13 +97,12 @@ async def get_tracing_history(
     child_id: str,
     letter: Optional[str] = Query(None, max_length=1),
     limit: int = Query(20, ge=1, le=100),
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get tracing session history for a child.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     query = select(TracingSession).where(TracingSession.child_id == child.id)
     
@@ -157,13 +156,12 @@ async def get_words(
 @router.get("/{child_id}/words/progress", response_model=List[WordsByLevel])
 async def get_word_progress_by_level(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get child's word learning progress organized by level.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     literacy_service = LiteracyService(db)
     progress = await literacy_service.get_word_progress_by_level(child.id)
@@ -176,13 +174,12 @@ async def record_word_practice(
     child_id: str,
     word_id: str,
     is_correct: bool,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Record a word practice attempt.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     literacy_service = LiteracyService(db)
     progress = await literacy_service.record_word_practice(
@@ -195,7 +192,6 @@ async def record_word_practice(
 @router.get("/{child_id}/letter-groups")
 async def get_letter_groups_progress(
     child_id: str,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -207,7 +203,7 @@ async def get_letter_groups_progress(
     3. Diagonals: A, V, W, M, N, K, X, Y, Z
     4. Mixed: B, D, J, P, R, U
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     literacy_service = LiteracyService(db)
     groups = await literacy_service.get_letter_groups_progress(child.id)
@@ -268,13 +264,12 @@ async def record_story_completion(
     story_id: str,
     pages_read: int,
     time_spent_seconds: int,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Record completion of a story reading session.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     return {
         "success": True,
@@ -292,7 +287,6 @@ async def record_phonics_practice(
     letter: str = Query(..., max_length=1),
     sound_played: bool = Query(default=True),
     word_example: Optional[str] = None,
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -300,7 +294,7 @@ async def record_phonics_practice(
     
     Tracks letter sounds and example words learned.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     return {
         "success": True,
@@ -319,7 +313,6 @@ async def record_word_building(
     completed: bool = Query(...),
     attempts: int = Query(default=1, ge=1),
     time_taken_seconds: int = Query(..., ge=0),
-    current_parent: Parent = Depends(get_current_parent),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -327,7 +320,7 @@ async def record_word_building(
     
     Tracks words built by dragging letters.
     """
-    child = await get_child_for_parent(child_id, current_parent.id, db)
+    child = await get_child_by_id(child_id, db)
     
     return {
         "success": True,
