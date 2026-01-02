@@ -119,55 +119,63 @@ class _PhonicsScreenState extends State<PhonicsScreen> {
               
               const Spacer(),
               
-              // Big Letter Card
+              // Big Letter Card - responsive
               GestureDetector(
                 onTap: _playSound,
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppTheme.literacyColor, AppTheme.literacyColor.withOpacity(0.7)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.literacyColor.withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        current['letter'],
-                        style: const TextStyle(
-                          fontSize: 100,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final cardSize = (constraints.maxWidth * 0.5).clamp(150.0, 200.0);
+                    return Container(
+                      width: cardSize,
+                      height: cardSize,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppTheme.literacyColor, AppTheme.literacyColor.withOpacity(0.7)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(cardSize * 0.16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.literacyColor.withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                      const Icon(Icons.volume_up, color: Colors.white, size: 32),
-                    ],
-                  ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              current['letter'],
+                              style: TextStyle(
+                                fontSize: cardSize * 0.5,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Icon(Icons.volume_up, color: Colors.white, size: cardSize * 0.15),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ).animate().scale(curve: Curves.elasticOut),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               
               // Sound text
               Text(
                 'Makes the "${current['sound']}" sound',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
               ).animate().fadeIn(),
               
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               
               // Word reveal
               if (_showWord)
@@ -175,9 +183,9 @@ class _PhonicsScreenState extends State<PhonicsScreen> {
                   children: [
                     Text(
                       current['emoji'],
-                      style: const TextStyle(fontSize: 80),
+                      style: const TextStyle(fontSize: 64),
                     ).animate().scale(curve: Curves.elasticOut),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Text(
                       '${current['letter']} is for ${current['word']}!',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(

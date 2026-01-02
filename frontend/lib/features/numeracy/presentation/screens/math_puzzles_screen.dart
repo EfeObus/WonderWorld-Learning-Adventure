@@ -36,12 +36,14 @@ class _MathPuzzlesScreenState extends State<MathPuzzlesScreen> {
     _isAddition = _random.nextBool();
     
     if (_isAddition) {
-      _num1 = _random.nextInt(10) + 1;
-      _num2 = _random.nextInt(10 - _num1) + 1;
+      _num1 = _random.nextInt(9) + 1; // 1-9 to ensure room for _num2
+      final maxNum2 = 10 - _num1;
+      _num2 = maxNum2 > 0 ? _random.nextInt(maxNum2) + 1 : 1;
       _correctAnswer = _num1 + _num2;
     } else {
-      _num1 = _random.nextInt(10) + 5;
-      _num2 = _random.nextInt(_num1 - 1) + 1;
+      _num1 = _random.nextInt(10) + 5; // 5-14
+      final maxNum2 = _num1 - 1;
+      _num2 = maxNum2 > 0 ? _random.nextInt(maxNum2) + 1 : 1;
       _correctAnswer = _num1 - _num2;
     }
     
@@ -255,69 +257,79 @@ class _MathPuzzlesScreenState extends State<MathPuzzlesScreen> {
                     ),
                   ],
                 ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // First number with nooms
-                        _NumberBlock(number: _num1),
-                        const SizedBox(width: 16),
-                        
-                        // Operation
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: operationColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              _isAddition ? '+' : '-',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isSmallScreen = constraints.maxWidth < 360;
+                    final blockSize = isSmallScreen ? 50.0 : 65.0;
+                    final opSize = isSmallScreen ? 40.0 : 50.0;
+                    final fontSize = isSmallScreen ? 28.0 : 32.0;
+                    final spacing = isSmallScreen ? 8.0 : 12.0;
+                    
+                    return FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // First number
+                          _NumberBlock(number: _num1, size: blockSize),
+                          SizedBox(width: spacing),
+                          
+                          // Operation
+                          Container(
+                            width: opSize,
+                            height: opSize,
+                            decoration: BoxDecoration(
+                              color: operationColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                _isAddition ? '+' : '-',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        
-                        // Second number with nooms
-                        _NumberBlock(number: _num2),
-                        const SizedBox(width: 16),
-                        
-                        // Equals
-                        const Text(
-                          '=',
-                          style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 16),
-                        
-                        // Question mark
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(16),
+                          SizedBox(width: spacing),
+                          
+                          // Second number
+                          _NumberBlock(number: _num2, size: blockSize),
+                          SizedBox(width: spacing),
+                          
+                          // Equals
+                          Text(
+                            '=',
+                            style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
                           ),
-                          child: const Center(
-                            child: Text(
-                              '?',
-                              style: TextStyle(
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
+                          SizedBox(width: spacing),
+                          
+                          // Question mark
+                          Container(
+                            width: blockSize,
+                            height: blockSize,
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '?',
+                                style: TextStyle(
+                                  fontSize: fontSize + 4,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9)),
               
@@ -364,17 +376,18 @@ class _MathPuzzlesScreenState extends State<MathPuzzlesScreen> {
 
 class _NumberBlock extends StatelessWidget {
   final int number;
+  final double size;
 
-  const _NumberBlock({required this.number});
+  const _NumberBlock({required this.number, this.size = 65});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 80,
-      height: 80,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: AppTheme.numeracyColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: AppTheme.numeracyColor.withOpacity(0.4),
@@ -384,12 +397,18 @@ class _NumberBlock extends StatelessWidget {
         ],
       ),
       child: Center(
-        child: Text(
-          '$number',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 40,
-            fontWeight: FontWeight.bold,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              '$number',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: size * 0.5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
       ),

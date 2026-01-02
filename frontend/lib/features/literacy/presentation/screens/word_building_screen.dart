@@ -133,73 +133,85 @@ class _WordBuildingScreenState extends State<WordBuildingScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             children: [
               // Emoji hint
               Text(
                 current['emoji'],
-                style: const TextStyle(fontSize: 80),
+                style: const TextStyle(fontSize: 64),
               ).animate().scale(curve: Curves.elasticOut),
               
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               
               Text(
                 'Hint: ${current['hint']}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
               ),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               
-              // Word slots
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  _builtWord.length,
-                  (i) => GestureDetector(
-                    onTap: () => _removeLetter(i),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
-                      width: 60,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        color: _builtWord[i].isEmpty 
-                            ? AppTheme.literacyColor.withOpacity(0.2)
-                            : _isComplete 
-                                ? AppTheme.successColor 
-                                : AppTheme.literacyColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppTheme.literacyColor,
-                          width: 3,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _builtWord[i],
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.w900,
+              // Word slots - responsive with Wrap
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final slotSize = ((constraints.maxWidth - 32) / _builtWord.length).clamp(40.0, 56.0);
+                  return Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: List.generate(
+                      _builtWord.length,
+                      (i) => GestureDetector(
+                        onTap: () => _removeLetter(i),
+                        child: Container(
+                          width: slotSize,
+                          height: slotSize + 8,
+                          decoration: BoxDecoration(
                             color: _builtWord[i].isEmpty 
-                                ? Colors.transparent 
-                                : Colors.white,
+                                ? AppTheme.literacyColor.withOpacity(0.2)
+                                : _isComplete 
+                                    ? AppTheme.successColor 
+                                    : AppTheme.literacyColor,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: AppTheme.literacyColor,
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: Text(
+                                  _builtWord[i],
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                    color: _builtWord[i].isEmpty 
+                                        ? Colors.transparent 
+                                        : Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ).animate(delay: (i * 100).ms).scale(),
-                ),
+                  );
+                },
               ),
               
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
               
               // Available letters
               if (!_isComplete)
                 Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  spacing: 8,
+                  runSpacing: 8,
                   alignment: WrapAlignment.center,
                   children: List.generate(
                     _availableLetters.length,
@@ -207,11 +219,11 @@ class _WordBuildingScreenState extends State<WordBuildingScreen> {
                         ? GestureDetector(
                             onTap: () => _selectLetter(i),
                             child: Container(
-                              width: 56,
-                              height: 56,
+                              width: 48,
+                              height: 48,
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppTheme.literacyColor.withOpacity(0.3),

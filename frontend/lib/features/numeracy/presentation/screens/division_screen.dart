@@ -128,14 +128,14 @@ class _DivisionScreenState extends State<DivisionScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             children: [
               const Spacer(),
               
               // Visual representation - sharing items
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.orange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -144,58 +144,63 @@ class _DivisionScreenState extends State<DivisionScreen> {
                   children: [
                     Text(
                       'Share $_total $_emoji equally among $_divisor friends',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     // Show total items
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(
-                        _emoji * _total,
-                        style: const TextStyle(fontSize: 24),
-                        textAlign: TextAlign.center,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          _emoji * _total,
+                          style: const TextStyle(fontSize: 20),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    const Icon(Icons.arrow_downward, size: 32, color: Colors.orange),
-                    const SizedBox(height: 12),
-                    // Show friends
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    const SizedBox(height: 10),
+                    const Icon(Icons.arrow_downward, size: 28, color: Colors.orange),
+                    const SizedBox(height: 10),
+                    // Show friends - use Wrap for responsiveness
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: List.generate(_divisor, (i) => 
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Text('👤', style: TextStyle(fontSize: 32)),
-                        ),
+                        const Text('👤', style: TextStyle(fontSize: 28)),
                       ),
                     ),
                   ],
                 ),
               ).animate().fadeIn(),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               
               // Question
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppTheme.numeracyColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
                   children: [
-                    Text(
-                      '$_total ÷ $_divisor = ?',
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.numeracyColor,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        '$_total ÷ $_divisor = ?',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.numeracyColor,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),

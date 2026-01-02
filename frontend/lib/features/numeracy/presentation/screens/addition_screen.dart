@@ -133,68 +133,77 @@ class _AdditionScreenState extends State<AdditionScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             children: [
               const Spacer(),
               
-              // Visual representation
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // First group
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
+              // Visual representation - made responsive
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // First group
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_getEmoji(_num1), style: const TextStyle(fontSize: 28)),
+                          const SizedBox(height: 4),
+                          Text('$_num1', style: Theme.of(context).textTheme.headlineSmall),
+                        ],
+                      ),
+                    ).animate().fadeIn().slideX(begin: -0.3),
+                    
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('+', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
                     ),
-                    child: Column(
-                      children: [
-                        Text(_getEmoji(_num1), style: const TextStyle(fontSize: 32)),
-                        const SizedBox(height: 8),
-                        Text('$_num1', style: Theme.of(context).textTheme.headlineMedium),
-                      ],
-                    ),
-                  ).animate().fadeIn().slideX(begin: -0.3),
-                  
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('+', style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
-                  ),
-                  
-                  // Second group
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(_getEmoji(_num2), style: const TextStyle(fontSize: 32)),
-                        const SizedBox(height: 8),
-                        Text('$_num2', style: Theme.of(context).textTheme.headlineMedium),
-                      ],
-                    ),
-                  ).animate().fadeIn().slideX(begin: 0.3),
-                ],
+                    
+                    // Second group
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_getEmoji(_num2), style: const TextStyle(fontSize: 28)),
+                          const SizedBox(height: 4),
+                          Text('$_num2', style: Theme.of(context).textTheme.headlineSmall),
+                        ],
+                      ),
+                    ).animate().fadeIn().slideX(begin: 0.3),
+                  ],
+                ),
               ),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               
               // Question
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppTheme.numeracyColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
-                  '$_num1 + $_num2 = ?',
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.numeracyColor,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '$_num1 + $_num2 = ?',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.numeracyColor,
+                    ),
                   ),
                 ),
               ).animate().scale(),

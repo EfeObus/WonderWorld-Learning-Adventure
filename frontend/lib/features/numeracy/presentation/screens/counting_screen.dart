@@ -197,33 +197,44 @@ class _CountingScreenState extends State<CountingScreen> {
               
               const Spacer(),
               
-              // Number display
+              // Number display - responsive
               GestureDetector(
                 onTap: _onTapNoom,
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final size = (constraints.maxWidth * 0.45).clamp(140.0, 200.0);
+                    return Container(
+                      width: size,
+                      height: size,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(size * 0.16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: color.withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$_currentNumber',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: Colors.white,
-                        fontSize: 100,
-                        fontWeight: FontWeight.w800,
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              '$_currentNumber',
+                              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                                color: Colors.white,
+                                fontSize: size * 0.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ).animate().scale(curve: Curves.elasticOut),
               

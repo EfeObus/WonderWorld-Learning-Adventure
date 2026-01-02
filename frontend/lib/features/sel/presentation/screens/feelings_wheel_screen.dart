@@ -215,85 +215,101 @@ class _FeelingsWheelScreenState extends State<FeelingsWheelScreen>
               // Feelings wheel
               Expanded(
                 child: Center(
-                  child: AnimatedBuilder(
-                    animation: _controller,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        painter: FeelingsWheelPainter(
-                          feelings: _feelings,
-                          rotation: _controller.value * 2 * pi * 0.02,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final wheelSize = constraints.maxWidth < constraints.maxHeight 
+                          ? constraints.maxWidth * 0.85 
+                          : constraints.maxHeight * 0.85;
+                      final clampedSize = wheelSize.clamp(200.0, 320.0);
+                      final radius = clampedSize * 0.36;
+                      final emojiSize = clampedSize * 0.18;
+                      
+                      return AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            painter: FeelingsWheelPainter(
+                              feelings: _feelings,
+                              rotation: _controller.value * 2 * pi * 0.02,
+                            ),
+                            child: child,
+                          );
+                        },
+                        child: SizedBox(
+                          width: clampedSize,
+                          height: clampedSize,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              ..._feelings.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final feeling = entry.value;
+                                final angle = (index / _feelings.length) * 2 * pi - pi / 2;
+                                
+                                return Positioned(
+                                  left: clampedSize / 2 + cos(angle) * radius - emojiSize / 2,
+                                  top: clampedSize / 2 + sin(angle) * radius - emojiSize / 2,
+                                  child: GestureDetector(
+                                    onTap: () => _selectFeeling(feeling),
+                                    child: Container(
+                                      width: emojiSize,
+                                      height: emojiSize,
+                                      decoration: BoxDecoration(
+                                        color: feeling['color'],
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: (feeling['color'] as Color).withOpacity(0.4),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                        border: _selectedFeeling == feeling['name']
+                                            ? Border.all(color: Colors.white, width: 3)
+                                            : null,
+                                      ),
+                                      child: Center(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            feeling['emoji'],
+                                            style: TextStyle(fontSize: emojiSize * 0.5),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ).animate(delay: (200 + 100 * index).ms)
+                                      .fadeIn()
+                                      .scale(begin: const Offset(0.5, 0.5)),
+                                );
+                              }),
+                              // Center circle
+                              Container(
+                                width: clampedSize * 0.26,
+                                height: clampedSize * 0.26,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text('💝', style: TextStyle(fontSize: clampedSize * 0.12)),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: child,
                       );
                     },
-                    child: SizedBox(
-                      width: 300,
-                      height: 300,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          ..._feelings.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final feeling = entry.value;
-                            final angle = (index / _feelings.length) * 2 * pi - pi / 2;
-                            final radius = 110.0;
-                            
-                            return Positioned(
-                              left: 150 + cos(angle) * radius - 32,
-                              top: 150 + sin(angle) * radius - 32,
-                              child: GestureDetector(
-                                onTap: () => _selectFeeling(feeling),
-                                child: Container(
-                                  width: 64,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    color: feeling['color'],
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: (feeling['color'] as Color).withOpacity(0.4),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                    border: _selectedFeeling == feeling['name']
-                                        ? Border.all(color: Colors.white, width: 3)
-                                        : null,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      feeling['emoji'],
-                                      style: const TextStyle(fontSize: 32),
-                                    ),
-                                  ),
-                                ),
-                              ).animate(delay: (200 + 100 * index).ms)
-                                  .fadeIn()
-                                  .scale(begin: const Offset(0.5, 0.5)),
-                            );
-                          }),
-                          // Center circle
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Center(
-                              child: Text('💝', style: TextStyle(fontSize: 36)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
               ),

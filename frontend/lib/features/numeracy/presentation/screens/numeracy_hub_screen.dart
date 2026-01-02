@@ -180,7 +180,7 @@ class _ActivityCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [color.withOpacity(0.2), color.withOpacity(0.1)],
@@ -190,13 +190,16 @@ class _ActivityCard extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(emoji, style: const TextStyle(fontSize: 28)),
+                  Flexible(
+                    child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                  ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: color.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(12),
@@ -206,7 +209,7 @@ class _ActivityCard extends StatelessWidget {
                       style: TextStyle(
                         color: color,
                         fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                     ),
                   ),
@@ -215,24 +218,29 @@ class _ActivityCard extends StatelessWidget {
               const Spacer(),
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppTheme.textSecondary,
+                  fontSize: 11,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               LinearProgressIndicator(
                 value: progress,
                 backgroundColor: color.withOpacity(0.2),
                 valueColor: AlwaysStoppedAnimation(color),
-                minHeight: 6,
-                borderRadius: BorderRadius.circular(3),
+                minHeight: 4,
+                borderRadius: BorderRadius.circular(2),
               ),
             ],
           ),

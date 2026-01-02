@@ -127,7 +127,7 @@ class _SubtractionScreenState extends State<SubtractionScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             children: [
               const Spacer(),
@@ -137,7 +137,7 @@ class _SubtractionScreenState extends State<SubtractionScreen> {
                 children: [
                   // Starting amount
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.green.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
@@ -146,22 +146,25 @@ class _SubtractionScreenState extends State<SubtractionScreen> {
                       children: [
                         Text(
                           'Start with $_num1 $_emoji',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _emoji * _num1,
-                          style: const TextStyle(fontSize: 28),
+                        const SizedBox(height: 6),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _emoji * _num1,
+                            style: const TextStyle(fontSize: 24),
+                          ),
                         ),
                       ],
                     ),
                   ).animate().fadeIn(),
                   
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   
                   // Take away
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.red.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
@@ -170,16 +173,19 @@ class _SubtractionScreenState extends State<SubtractionScreen> {
                       children: [
                         Text(
                           'Take away $_num2 $_emoji',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _emoji * _num2,
-                          style: TextStyle(
-                            fontSize: 28,
-                            decoration: TextDecoration.lineThrough,
-                            decorationColor: Colors.red,
-                            decorationThickness: 3,
+                        const SizedBox(height: 6),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _emoji * _num2,
+                            style: TextStyle(
+                              fontSize: 24,
+                              decoration: TextDecoration.lineThrough,
+                              decorationColor: Colors.red,
+                              decorationThickness: 3,
+                            ),
                           ),
                         ),
                       ],
@@ -188,25 +194,28 @@ class _SubtractionScreenState extends State<SubtractionScreen> {
                 ],
               ),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               
               // Question
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppTheme.numeracyColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
-                  '$_num1 - $_num2 = ?',
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.numeracyColor,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '$_num1 - $_num2 = ?',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.numeracyColor,
+                    ),
                   ),
                 ),
               ).animate().scale(),
               
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
               
               // Answer options
               Wrap(
