@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class ChildAvatar extends StatelessWidget {
-  final int avatarId;
+  final String avatarId;
   final double size;
   
   const ChildAvatar({
@@ -11,35 +11,43 @@ class ChildAvatar extends StatelessWidget {
     this.size = 60,
   });
   
-  // Cute animal avatars for children
-  static const List<String> avatars = [
-    '🐰', // Bunny
-    '🐻', // Bear
-    '🦊', // Fox
-    '🐱', // Cat
-    '🐶', // Dog
-    '🐼', // Panda
-    '🦁', // Lion
-    '🐨', // Koala
-    '🐯', // Tiger
-    '🦄', // Unicorn
-    '🐸', // Frog
-    '🐙', // Octopus
-  ];
+  // Cute animal avatars for children - map avatar IDs to emojis
+  static const Map<String, String> avatarEmojis = {
+    'avatar_star': '⭐',
+    'avatar_bunny': '🐰',
+    'avatar_bear': '🐻',
+    'avatar_fox': '🦊',
+    'avatar_cat': '🐱',
+    'avatar_dog': '🐶',
+    'avatar_panda': '🐼',
+    'avatar_lion': '🦁',
+    'avatar_koala': '🐨',
+    'avatar_tiger': '🐯',
+    'avatar_unicorn': '🦄',
+    'avatar_frog': '🐸',
+    'avatar_octopus': '🐙',
+  };
   
-  static const List<Color> avatarColors = [
-    Color(0xFFFFE0EC), // Pink
-    Color(0xFFE0F2FF), // Blue
-    Color(0xFFE0FFE0), // Green
-    Color(0xFFFFF0E0), // Orange
-    Color(0xFFE8E0FF), // Purple
-    Color(0xFFFFF8E0), // Yellow
-  ];
+  static const Map<String, Color> avatarColors = {
+    'avatar_star': Color(0xFFFFF8E0),
+    'avatar_bunny': Color(0xFFFFE0EC),
+    'avatar_bear': Color(0xFFFFF0E0),
+    'avatar_fox': Color(0xFFFFF0E0),
+    'avatar_cat': Color(0xFFE8E0FF),
+    'avatar_dog': Color(0xFFE0F2FF),
+    'avatar_panda': Color(0xFFE0FFE0),
+    'avatar_lion': Color(0xFFFFF8E0),
+    'avatar_koala': Color(0xFFE0F2FF),
+    'avatar_tiger': Color(0xFFFFF0E0),
+    'avatar_unicorn': Color(0xFFE8E0FF),
+    'avatar_frog': Color(0xFFE0FFE0),
+    'avatar_octopus': Color(0xFFE8E0FF),
+  };
 
   @override
   Widget build(BuildContext context) {
-    final avatar = avatars[(avatarId - 1) % avatars.length];
-    final bgColor = avatarColors[(avatarId - 1) % avatarColors.length];
+    final avatar = avatarEmojis[avatarId] ?? '⭐';
+    final bgColor = avatarColors[avatarId] ?? const Color(0xFFFFF8E0);
     
     return Container(
       width: size,

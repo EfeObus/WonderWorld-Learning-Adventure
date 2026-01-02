@@ -20,15 +20,15 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 5067
     
-    # Database
-    database_url: str = "postgresql+asyncpg://efeobukohwo:12345@localhost:5432/wonderworld_learning"
+    # Database - MUST be set via environment variable or .env file
+    database_url: str = "postgresql+asyncpg://user:password@localhost:5432/wonderworld_learning"
     database_echo: bool = False
     
     # Redis
     redis_url: str = "redis://localhost:6379"
     
-    # JWT Authentication
-    jwt_secret: str = "your-super-secret-jwt-key-change-in-production"
+    # JWT Authentication - MUST be set via environment variable for production
+    jwt_secret: str = "CHANGE_THIS_SECRET_IN_PRODUCTION"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 15
     jwt_refresh_token_expire_days: int = 7
@@ -49,8 +49,13 @@ class Settings(BaseSettings):
     initial_ability_score: float = 0.0
     initial_ability_variance: float = 1.0
     
-    # CORS
-    cors_origins: list = ["http://localhost:5067", "http://localhost:8080"]
+    # CORS - Add your production domains here
+    cors_origins: list = [
+        "http://localhost:5067",
+        "http://localhost:8080",
+        "https://*.railway.app",  # Railway deployment
+        "*"  # Allow all origins for mobile app
+    ]
     
     class Config:
         env_file = "../.env"

@@ -97,7 +97,7 @@ frontend/
 Update `lib/core/services/api_service.dart` to point to your backend:
 
 ```dart
-static const String baseUrl = 'http://localhost:8000/api/v1';
+static const String baseUrl = 'http://localhost:5067/api';
 ```
 
 For production:

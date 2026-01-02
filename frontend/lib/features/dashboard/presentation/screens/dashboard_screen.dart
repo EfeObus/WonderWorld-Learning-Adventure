@@ -54,29 +54,26 @@ class DashboardScreen extends ConsumerWidget {
               
               const SizedBox(height: 24),
               
-              // Child cards
-              if (childState.children.isNotEmpty) ...[
+              // Child card (single child in anonymous mode)
+              if (childState.currentChild != null) ...[
                 Text(
-                  'Your Children',
+                  'Your Child',
                   style: Theme.of(context).textTheme.titleLarge,
                 ).animate(delay: 200.ms).fadeIn(),
                 
                 const SizedBox(height: 12),
                 
-                ...childState.children.asMap().entries.map((entry) {
-                  final child = entry.value;
-                  return _ChildProgressCard(
-                    childName: child.displayName,
-                    avatarEmoji: _getAvatarEmoji(child.avatarId),
-                    starsEarned: child.starsEarned,
-                    streak: child.currentStreak,
-                    literacyProgress: 0.65,
-                    numeracyProgress: 0.45,
-                    selProgress: 0.80,
-                  ).animate(delay: (300 + entry.key * 100).ms)
-                      .fadeIn()
-                      .slideX(begin: -0.2);
-                }),
+                _ChildProgressCard(
+                  childName: childState.currentChild!.displayName,
+                  avatarEmoji: _getAvatarEmoji(childState.currentChild!.avatarId),
+                  starsEarned: childState.currentChild!.starsEarned,
+                  streak: childState.currentChild!.currentStreak,
+                  literacyProgress: 0.65,
+                  numeracyProgress: 0.45,
+                  selProgress: 0.80,
+                ).animate(delay: 300.ms)
+                    .fadeIn()
+                    .slideX(begin: -0.2),
               ],
               
               const SizedBox(height: 32),
@@ -141,9 +138,24 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  String _getAvatarEmoji(int avatarId) {
-    const avatars = ['🐰', '🐻', '🦊', '🐱', '🐶', '🐼', '🦁', '🐨', '🐯', '🦄', '🐸', '🐙'];
-    return avatars[(avatarId - 1) % avatars.length];
+  String _getAvatarEmoji(String avatarId) {
+    // Map avatar IDs to emojis
+    const avatarMap = {
+      'avatar_star': '⭐',
+      'avatar_bunny': '🐰',
+      'avatar_bear': '🐻',
+      'avatar_fox': '🦊',
+      'avatar_cat': '🐱',
+      'avatar_dog': '🐶',
+      'avatar_panda': '🐼',
+      'avatar_lion': '🦁',
+      'avatar_koala': '🐨',
+      'avatar_tiger': '🐯',
+      'avatar_unicorn': '🦄',
+      'avatar_frog': '🐸',
+      'avatar_octopus': '🐙',
+    };
+    return avatarMap[avatarId] ?? '⭐';
   }
 
   Widget _buildWeeklySummary(BuildContext context) {

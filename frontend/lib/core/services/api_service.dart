@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'storage_service.dart';
 
@@ -6,7 +7,13 @@ import 'storage_service.dart';
 /// NOTE: Authentication is disabled - kids play directly without login.
 /// Uses device-based identification for progress tracking.
 class ApiService {
-  static const String baseUrl = 'http://localhost:5067/api';
+  // TODO: Replace with your Railway production URL after deployment
+  // Example: 'https://wonderworld-api-production.up.railway.app/api'
+  static const String _productionUrl = 'https://YOUR_RAILWAY_URL_HERE.railway.app/api';
+  static const String _developmentUrl = 'http://localhost:5067/api';
+  
+  // Use production URL in release mode, development URL in debug mode
+  static String get baseUrl => kReleaseMode ? _productionUrl : _developmentUrl;
   
   late final Dio _dio;
   
@@ -169,41 +176,6 @@ class ApiService {
       _dio.post('/literacy/$childId/story/$storyId/complete', queryParameters: {
         'pages_read': pagesRead,
       });
-  
-  // Numeracy - Additional
-  Future<Response> recordShape(String childId, String shapeName, bool recognized, int responseTimeMs) => 
-      _dio.post('/numeracy/$childId/shapes', queryParameters: {
-        'shape_name': shapeName,
-        'recognized': recognized,
-        'response_time_ms': responseTimeMs,
-      });
-  
-  Future<Response> getShapesProgress(String childId) => 
-      _dio.get('/numeracy/$childId/shapes/progress');
-  
-  Future<Response> recordSubitizing(String childId, int shown, int guessed, int responseTimeMs) => 
-      _dio.post('/numeracy/$childId/subitizing', queryParameters: {
-        'shown_count': shown,
-        'guessed_count': guessed,
-        'response_time_ms': responseTimeMs,
-      });
-  
-  Future<Response> recordNumeralRecognition(String childId, int numeral, bool recognized) => 
-      _dio.post('/numeracy/$childId/numeral-recognition', queryParameters: {
-        'numeral': numeral,
-        'recognized': recognized,
-      });
-  
-  Future<Response> recordPuzzle(String childId, int level, bool completed, {int attempts = 1}) => 
-      _dio.post('/numeracy/$childId/st-puzzle', queryParameters: {
-        'puzzle_level': level,
-        'completed': completed,
-        'attempts': attempts,
-      });
-}
-
-// Provider
-final apiService = ApiService();
   
   // Numeracy - Additional
   Future<Response> recordShape(String childId, String shapeName, bool recognized, int responseTimeMs) => 

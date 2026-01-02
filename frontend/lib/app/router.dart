@@ -29,7 +29,7 @@ import '../features/splash/presentation/screens/splash_screen.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: false,  // Set to true for debugging
     routes: [
       // Splash - goes directly to home
       GoRoute(

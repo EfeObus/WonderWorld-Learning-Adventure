@@ -286,7 +286,7 @@ chmod +x init.sh
 
 # Return to backend and start server
 cd ../backend
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 5067
 ```
 
 ### Frontend Setup (Flutter Mobile App)
@@ -316,11 +316,11 @@ flutter build ios --release  # iOS
 
 ```bash
 # After setup, the API is available at:
-# http://localhost:8000
+# http://localhost:5067
 
 # View interactive API documentation:
-# http://localhost:8000/docs (Swagger UI)
-# http://localhost:8000/redoc (ReDoc)
+# http://localhost:5067/docs (Swagger UI)
+# http://localhost:5067/redoc (ReDoc)
 ```
 
 ### Frontend Setup (Coming Soon)
@@ -342,13 +342,13 @@ Environment variables in .env file:
 | DATABASE_URL | PostgreSQL connection string |
 | REDIS_URL | Redis connection string |
 | JWT_SECRET | Secret key for JWT signing |
-| API_PORT | Backend server port (default: 8000) |
+| API_PORT | Backend server port (default: 5067) |
 
 ## API Documentation
 
 Access interactive API docs at:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger UI: http://localhost:5067/docs
+- ReDoc: http://localhost:5067/redoc
 
 ### API Endpoints Overview
 

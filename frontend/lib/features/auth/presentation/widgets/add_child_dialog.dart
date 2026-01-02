@@ -6,6 +6,8 @@ import '../../../../core/providers/child_provider.dart';
 import 'child_avatar.dart';
 import 'gradient_button.dart';
 
+/// Edit Profile Dialog - Allows updating child profile settings
+/// NOTE: Multi-child creation disabled - this now edits the current anonymous child
 class AddChildDialog extends ConsumerStatefulWidget {
   const AddChildDialog({super.key});
 
@@ -15,11 +17,39 @@ class AddChildDialog extends ConsumerStatefulWidget {
 
 class _AddChildDialogState extends ConsumerState<AddChildDialog> {
   final _nameController = TextEditingController();
-  String _selectedAgeGroup = '2-4';
-  int _selectedAvatarId = 1;
+  String _selectedAgeGroup = '3-5';
+  String _selectedAvatarId = 'avatar_star';
   bool _isLoading = false;
 
-  final List<String> _ageGroups = ['2-4', '4-6', '6-8'];
+  final List<String> _ageGroups = ['2-3', '3-5', '6-8'];
+  
+  // Available avatar IDs
+  static const List<String> _avatarIds = [
+    'avatar_star',
+    'avatar_bunny',
+    'avatar_bear',
+    'avatar_fox',
+    'avatar_cat',
+    'avatar_dog',
+    'avatar_panda',
+    'avatar_lion',
+    'avatar_koala',
+    'avatar_tiger',
+    'avatar_unicorn',
+    'avatar_frog',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill with current child data if available
+    final currentChild = ref.read(childStateProvider).currentChild;
+    if (currentChild != null) {
+      _nameController.text = currentChild.displayName;
+      _selectedAgeGroup = currentChild.ageGroup;
+      _selectedAvatarId = currentChild.avatarId;
+    }
+  }
 
   @override
   void dispose() {
@@ -27,7 +57,7 @@ class _AddChildDialogState extends ConsumerState<AddChildDialog> {
     super.dispose();
   }
 
-  Future<void> _createChild() async {
+  Future<void> _saveProfile() async {
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a name')),
@@ -37,7 +67,7 @@ class _AddChildDialogState extends ConsumerState<AddChildDialog> {
 
     setState(() => _isLoading = true);
 
-    final success = await ref.read(childStateProvider.notifier).createChild(
+    final success = await ref.read(childStateProvider.notifier).updateChild(
           displayName: _nameController.text.trim(),
           ageGroup: _selectedAgeGroup,
           avatarId: _selectedAvatarId,
@@ -47,6 +77,9 @@ class _AddChildDialogState extends ConsumerState<AddChildDialog> {
 
     if (success && mounted) {
       Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated!')),
+      );
     }
   }
 
@@ -62,7 +95,7 @@ class _AddChildDialogState extends ConsumerState<AddChildDialog> {
           children: [
             // Title
             Text(
-              'Add Child',
+              'Edit Profile',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppTheme.primaryColor,
               ),
@@ -75,7 +108,7 @@ class _AddChildDialogState extends ConsumerState<AddChildDialog> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: 'Child\'s Name',
+                labelText: 'Your Name',
                 hintText: 'Enter name',
                 filled: true,
                 fillColor: Colors.grey.shade100,
@@ -137,9 +170,9 @@ class _AddChildDialogState extends ConsumerState<AddChildDialog> {
               height: 80,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: ChildAvatar.avatars.length,
+                itemCount: _avatarIds.length,
                 itemBuilder: (context, index) {
-                  final avatarId = index + 1;
+                  final avatarId = _avatarIds[index];
                   final isSelected = avatarId == _selectedAvatarId;
                   return GestureDetector(
                     onTap: () => setState(() => _selectedAvatarId = avatarId),
@@ -173,9 +206,9 @@ class _AddChildDialogState extends ConsumerState<AddChildDialog> {
                 Expanded(
                   flex: 2,
                   child: GradientButton(
-                    text: 'Add Child',
+                    text: 'Save',
                     isLoading: _isLoading,
-                    onPressed: _createChild,
+                    onPressed: _saveProfile,
                   ),
                 ),
               ],

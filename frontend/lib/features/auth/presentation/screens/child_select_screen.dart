@@ -6,8 +6,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/providers/child_provider.dart';
 import '../widgets/child_avatar.dart';
-import '../widgets/add_child_dialog.dart';
 
+/// Child Profile Screen - Shows the current child's profile
+/// NOTE: Authentication disabled - single anonymous child per device
 class ChildSelectScreen extends ConsumerWidget {
   const ChildSelectScreen({super.key});
 
@@ -25,7 +26,7 @@ class ChildSelectScreen extends ConsumerWidget {
               
               // Title
               Text(
-                'Who\'s Learning Today?',
+                'Your Profile',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   color: AppTheme.primaryColor,
                 ),
@@ -35,7 +36,7 @@ class ChildSelectScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               
               Text(
-                'Select a learner to continue',
+                'This is your learning profile',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
@@ -44,27 +45,24 @@ class ChildSelectScreen extends ConsumerWidget {
               
               const SizedBox(height: 48),
               
-              // Children grid
+              // Child profile card
               Expanded(
                 child: childState.isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : childState.children.isEmpty
-                        ? _buildEmptyState(context, ref)
-                        : _buildChildrenGrid(context, ref, childState.children),
+                    : childState.currentChild == null
+                        ? _buildLoadingState(context)
+                        : _buildProfileCard(context, ref, childState.currentChild!),
               ),
               
-              // Add child button
               const SizedBox(height: 24),
               
-              OutlinedButton.icon(
-                onPressed: () => _showAddChildDialog(context, ref),
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Add Child'),
-                style: OutlinedButton.styleFrom(
+              // Continue button
+              ElevatedButton.icon(
+                onPressed: () => context.go('/home'),
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: const Text('Continue Learning'),
+                style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
                 ),
               ).animate().fadeIn(delay: 500.ms),
               
@@ -83,141 +81,133 @@ class ChildSelectScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
+  Widget _buildLoadingState(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
-          '👶',
-          style: TextStyle(fontSize: 80),
-        ).animate().scale(curve: Curves.elasticOut),
+        const CircularProgressIndicator(),
         const SizedBox(height: 24),
         Text(
-          'No children yet!',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Add your child to start their\nlearning adventure',
+          'Setting up your profile...',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: AppTheme.textSecondary,
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 32),
-        ElevatedButton.icon(
-          onPressed: () => _showAddChildDialog(context, ref),
-          icon: const Icon(Icons.add_rounded),
-          label: const Text('Add Your First Child'),
         ),
       ],
     );
   }
 
-  Widget _buildChildrenGrid(BuildContext context, WidgetRef ref, List<Child> children) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: children.length,
-      itemBuilder: (context, index) {
-        final child = children[index];
-        return _ChildCard(
-          child: child,
-          onTap: () {
-            ref.read(childStateProvider.notifier).selectChild(child);
-            context.go('/home');
-          },
-        ).animate(delay: (100 * index).ms).fadeIn().scale(begin: const Offset(0.8, 0.8));
-      },
-    );
-  }
-
-  void _showAddChildDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => const AddChildDialog(),
-    );
-  }
-}
-
-class _ChildCard extends StatelessWidget {
-  final Child child;
-  final VoidCallback onTap;
-
-  const _ChildCard({
-    required this.child,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
+  Widget _buildProfileCard(BuildContext context, WidgetRef ref, Child child) {
+    return Center(
+      child: Card(
+        clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(32),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Avatar
               ChildAvatar(
                 avatarId: child.avatarId,
-                size: 80,
-              ),
-              const SizedBox(height: 12),
+                size: 120,
+              ).animate().scale(curve: Curves.elasticOut),
+              
+              const SizedBox(height: 20),
               
               // Name
               Text(
                 child.displayName,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
               
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               
               // Age group
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   'Age ${child.ageGroup}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppTheme.primaryColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
               
-              // Stars
+              // Stats row
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.star, color: AppTheme.warningColor, size: 20),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${child.starsEarned}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  // Stars
+                  _StatBadge(
+                    icon: Icons.star,
+                    iconColor: AppTheme.warningColor,
+                    value: '${child.starsEarned}',
+                    label: 'Stars',
+                  ),
+                  const SizedBox(width: 24),
+                  // Streak
+                  _StatBadge(
+                    icon: Icons.local_fire_department,
+                    iconColor: Colors.orange,
+                    value: '${child.currentStreak}',
+                    label: 'Day Streak',
                   ),
                 ],
               ),
             ],
           ),
         ),
-      ),
+      ).animate(delay: 200.ms).fadeIn().scale(begin: const Offset(0.9, 0.9)),
+    );
+  }
+}
+
+class _StatBadge extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String value;
+  final String label;
+
+  const _StatBadge({
+    required this.icon,
+    required this.iconColor,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: iconColor, size: 24),
+            const SizedBox(width: 4),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppTheme.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }
