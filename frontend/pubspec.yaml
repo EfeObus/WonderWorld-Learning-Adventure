@@ -70,6 +70,25 @@ dev_dependencies:
   riverpod_generator: ^2.3.9
   hive_generator: ^2.0.1
   retrofit_generator: ^8.0.6
+  flutter_launcher_icons: ^0.14.3
+
+# App Icon Configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.jpg"
+  min_sdk_android: 21
+  adaptive_icon_background: "#6366F1"
+  adaptive_icon_foreground: "assets/icons/app_icon.jpg"
+  web:
+    generate: true
+    image_path: "assets/icons/app_icon.jpg"
+    background_color: "#6366F1"
+    theme_color: "#6366F1"
+  windows:
+    generate: false
+  macos:
+    generate: false
 
 flutter:
   uses-material-design: true
