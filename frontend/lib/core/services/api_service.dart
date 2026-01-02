@@ -7,9 +7,8 @@ import 'storage_service.dart';
 /// NOTE: Authentication is disabled - kids play directly without login.
 /// Uses device-based identification for progress tracking.
 class ApiService {
-  // TODO: Replace with your Railway production URL after deployment
-  // Example: 'https://wonderworld-api-production.up.railway.app/api'
-  static const String _productionUrl = 'https://YOUR_RAILWAY_URL_HERE.railway.app/api';
+  // Production URL (Railway deployment)
+  static const String _productionUrl = 'https://poetic-grace-production.up.railway.app/api';
   static const String _developmentUrl = 'http://localhost:5067/api';
   
   // Use production URL in release mode, development URL in debug mode
