@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Data Extraction Rules for Android 12+ (API 31+)
+    
+    WonderWorld Learning Adventure - Children's Educational App
+    
+    These rules specify what data can be backed up or transferred.
+    For children's privacy, we disable cloud backup of app data.
+    Progress is stored locally only.
+-->
+<data-extraction-rules>
+    <!-- Cloud backup settings -->
+    <cloud-backup>
+        <!-- Exclude all user data from cloud backup for privacy -->
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="database" path="."/>
+        <exclude domain="file" path="."/>
+        <exclude domain="external" path="."/>
+        
+        <!-- Specifically exclude Hive local storage -->
+        <exclude domain="file" path="hive/"/>
+    </cloud-backup>
+    
+    <!-- Device-to-device transfer settings -->
+    <device-transfer>
+        <!-- Allow transfer during device migration (optional) -->
+        <!-- For children's app, we keep progress local only -->
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="database" path="."/>
+        <exclude domain="file" path="."/>
+    </device-transfer>
+</data-extraction-rules>

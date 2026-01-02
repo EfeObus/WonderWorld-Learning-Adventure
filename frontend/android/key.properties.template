@@ -1,0 +1,32 @@
+# ⚠️ IMPORTANT: DO NOT COMMIT THIS FILE TO VERSION CONTROL ⚠️
+# This file contains sensitive keystore credentials for signing your app.
+# Add this file to .gitignore to prevent accidental commits.
+
+# Instructions to create your own keystore for Play Store release:
+#
+# 1. Generate a new keystore using keytool:
+#    keytool -genkey -v -keystore wonderworld-release-key.jks \
+#            -keyalg RSA -keysize 2048 -validity 10000 \
+#            -alias wonderworld
+#
+# 2. Fill in the details below with your keystore information:
+#
+# storePassword=your_keystore_password
+# keyPassword=your_key_password
+# keyAlias=wonderworld
+# storeFile=../wonderworld-release-key.jks
+#
+# 3. Place your .jks file in the android/ folder (NOT in version control)
+#
+# 4. For Google Play Console:
+#    - Use Play App Signing (recommended)
+#    - Upload your signing key to Play Console
+#    - Google will manage the app signing key
+
+# ============================================
+# TEMPLATE - Replace with your actual values:
+# ============================================
+storePassword=REPLACE_WITH_YOUR_PASSWORD
+keyPassword=REPLACE_WITH_YOUR_PASSWORD
+keyAlias=wonderworld
+storeFile=wonderworld-release-key.jks

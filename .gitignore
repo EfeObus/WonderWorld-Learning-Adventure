@@ -1,0 +1,56 @@
+# Environment files (NEVER commit these!)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+build/
+dist/
+.next/
+out/
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+*.iml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+
+# Database
+*.sql.backup
+
+# Python virtual environment
+backend/venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+__pycache__/
+backend/venv/
+__pycache__/
+*.pyc

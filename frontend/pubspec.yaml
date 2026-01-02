@@ -1,0 +1,91 @@
+name: wonderworld_learning
+description: WonderWorld Learning Adventure - Educational platform for children ages 2-8
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # Networking
+  dio: ^5.4.0
+  retrofit: ^4.0.3
+
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.2
+
+  # UI Components
+  flutter_svg: ^2.0.9
+  lottie: ^3.0.0
+  confetti: ^0.7.0
+  
+  # Game Engine
+  flame: ^1.14.0
+  flame_audio: ^2.1.6
+
+  # Audio (TTS for reading content to kids)
+  flutter_tts: ^3.8.5
+  
+  # Voice Recognition (for recognizing letters/words spoken by kids)
+  speech_to_text: ^7.0.0
+  
+  # Audio player for background music
+  audioplayers: ^5.2.1
+  
+  # Animations
+  flutter_animate: ^4.3.0
+  
+  # Icons & Fonts
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+
+  # Utilities
+  intl: ^0.18.1
+  equatable: ^2.0.5
+  json_annotation: ^4.8.1
+  freezed_annotation: ^2.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.8
+  json_serializable: ^6.7.1
+  freezed: ^2.4.6
+  riverpod_generator: ^2.3.9
+  hive_generator: ^2.0.1
+  retrofit_generator: ^8.0.6
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/audio/
+    - assets/animations/
+    - assets/fonts/
+
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Regular.ttf
+        - asset: assets/fonts/Nunito-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito-ExtraBold.ttf
+          weight: 800

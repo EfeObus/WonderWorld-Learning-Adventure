@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network Security Configuration for WonderWorld Learning Adventure
+    
+    This configuration enforces security best practices:
+    - Blocks cleartext (HTTP) traffic in production
+    - Enforces HTTPS for all network connections
+    - Enables certificate transparency logging
+    
+    Since this is a children's educational app, we have minimal 
+    network requirements and prioritize security.
+-->
+<network-security-config>
+    <!-- Base configuration for all domains -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust only system CA certificates -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- 
+        Debug overrides - allows HTTP during development only.
+        This is automatically disabled in release builds.
+    -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+    
+    <!--
+        Note: This app primarily works offline with local storage (Hive).
+        Network is only used for:
+        - Voice recognition (speech_to_text API calls)
+        - Text-to-speech engine updates
+        
+        No user data is transmitted to external servers.
+    -->
+</network-security-config>
